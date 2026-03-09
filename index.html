@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>秘鲁快递起网开通地图</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    html, body, #map { height: 100%; margin: 0; font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+    .panel {
+      position: absolute; z-index: 1000; top: 14px; left: 14px; width: 340px;
+      background: rgba(255,255,255,0.94); border-radius: 14px; padding: 14px 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    }
+    .panel h1 { margin: 0 0 8px; font-size: 18px; }
+    .panel p { margin: 0 0 6px; font-size: 12px; line-height: 1.45; color: #425466; }
+    .legend-item { display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 12px; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .radar {
+      position: relative; width: 18px; height: 18px; border-radius: 50%;
+      border: 2px solid currentColor; background: currentColor;
+      box-shadow: 0 0 0 4px rgba(255,255,255,0.8);
+    }
+    .radar::after {
+      content: ""; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+      width: 18px; height: 18px; border-radius: 50%; border: 2px solid currentColor;
+      opacity: 0.45; animation: pulse 1.8s infinite ease-out;
+    }
+    @keyframes pulse {
+      0% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+      100% { transform: translate(-50%, -50%) scale(2.8); opacity: 0; }
+    }
+    .leaflet-div-icon { background: transparent; border: none; }
+    .popup-title { font-weight: 700; margin-bottom: 6px; }
+    .popup-row { font-size: 12px; line-height: 1.45; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div class="panel">
+    <h1>秘鲁快递起网开通地图</h1>
+    <p>红色=第1期，橙色=第2期，浅绿=第3期。标记位置使用每个城市圈的核心开通点。</p>
+    <p>这不是行政区均衡图，而是面向轻资产快递起网的业务城市圈地图。</p>
+    <div class="legend-item"><span class="dot" style="background:#d22e2e"></span>第1期：骨架成网</div>
+    <div class="legend-item"><span class="dot" style="background:#eb852d"></span>第2期：扩容补强</div>
+    <div class="legend-item"><span class="dot" style="background:#9ac44f"></span>第3期：覆盖补盲</div>
+  </div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const points = [{"phase": "第1期", "circle": "TRUJILLO城市圈", "open_point": "LAREDO", "province": "TRUJILLO", "department": "LA LIBERTAD", "route": "北海岸主干", "score": 84.41, "population": 1221359, "type": "一级主干圈", "lat": -8.0911, "lon": -78.9611}, {"phase": "第1期", "circle": "SULLANA城市圈", "open_point": "SULLANA", "province": "SULLANA", "department": "PIURA", "route": "北海岸主干", "score": 80.15, "population": 1285768, "type": "一级主干圈", "lat": -4.9044, "lon": -80.7047}, {"phase": "第1期", "circle": "AREQUIPA城市圈", "open_point": "LA JOYA", "province": "AREQUIPA", "department": "AREQUIPA", "route": "南海岸主干", "score": 79.19, "population": 1241585, "type": "一级主干圈", "lat": -16.4239, "lon": -71.8206}, {"phase": "第1期", "circle": "CHICLAYO城市圈", "open_point": "CHICLAYO", "province": "CHICLAYO", "department": "LAMBAYEQUE", "route": "北海岸主干", "score": 75.91, "population": 908807, "type": "一级主干圈", "lat": -6.7736, "lon": -79.8397}, {"phase": "第1期", "circle": "PIURA城市圈", "open_point": "LA ARENA", "province": "PIURA", "department": "PIURA", "route": "北海岸主干", "score": 72.87, "population": 1041136, "type": "一级主干圈", "lat": -5.3464, "lon": -80.7108}, {"phase": "第1期", "circle": "PAIJAN城市圈", "open_point": "PAIJAN", "province": "ASCOPE", "department": "LA LIBERTAD", "route": "北海岸主干", "score": 67.3, "population": 512979, "type": "二级补强圈", "lat": -7.7319, "lon": -79.3019}, {"phase": "第1期", "circle": "HUANCAYO城市圈", "open_point": "EL TAMBO", "province": "HUANCAYO", "department": "JUNIN", "route": "中部山地线", "score": 64.52, "population": 411955, "type": "一级门户圈", "lat": -12.055, "lon": -75.2206}, {"phase": "第1期", "circle": "CUSCO城市圈", "open_point": "CUSCO", "province": "CUSCO", "department": "CUSCO", "route": "南高原线", "score": 64.1, "population": 520745, "type": "一级门户圈", "lat": -13.5153, "lon": -71.98}, {"phase": "第1期", "circle": "CHIMBOTE城市圈", "open_point": "CHIMBOTE", "province": "SANTA", "department": "ANCASH", "route": "北海岸主干", "score": 63.92, "population": 460492, "type": "二级补强圈", "lat": -9.0758, "lon": -78.5842}, {"phase": "第1期", "circle": "PAITA城市圈", "open_point": "PAITA", "province": "PAITA", "department": "PIURA", "route": "北海岸主干", "score": 62.96, "population": 311904, "type": "二级补强圈", "lat": -5.0883, "lon": -81.1164}, {"phase": "第1期", "circle": "TUMBES城市圈", "open_point": "TUMBES", "province": "TUMBES", "department": "TUMBES", "route": "北海岸主干", "score": 61.79, "population": 168166, "type": "二级补强圈", "lat": -3.5647, "lon": -80.4536}, {"phase": "第1期", "circle": "PUNO城市圈", "open_point": "PUNO", "province": "PUNO", "department": "PUNO", "route": "南高原线", "score": 61.18, "population": 550396, "type": "一级门户圈", "lat": -15.8406, "lon": -70.0278}, {"phase": "第2期", "circle": "TACNA城市圈", "open_point": "CORONEL GREGORIO ALBARRACIN LANCHIPA", "province": "TACNA", "department": "TACNA", "route": "南海岸主干", "score": 57.56, "population": 334803, "type": "二级补强圈", "lat": -18.0408, "lon": -70.2542}, {"phase": "第2期", "circle": "CHINCHA城市圈", "open_point": "CHINCHA ALTA", "province": "CHINCHA", "department": "ICA", "route": "南海岸主干", "score": 56.87, "population": 464485, "type": "二级补强圈", "lat": -13.42, "lon": -76.1356}, {"phase": "第1期", "circle": "AYACUCHO城市圈", "open_point": "AYACUCHO", "province": "HUAMANGA", "department": "AYACUCHO", "route": "南中山地线", "score": 56.58, "population": 216541, "type": "一级门户圈", "lat": -13.1542, "lon": -74.2228}, {"phase": "第2期", "circle": "ICA城市圈", "open_point": "ICA", "province": "ICA", "department": "ICA", "route": "南海岸主干", "score": 56.51, "population": 411795, "type": "二级补强圈", "lat": -14.0678, "lon": -75.7319}, {"phase": "第2期", "circle": "CAJABAMBA城市圈", "open_point": "CACHACHI", "province": "CAJABAMBA", "department": "CAJAMARCA", "route": "北山地支线", "score": 55.98, "population": 482785, "type": "二级补强圈", "lat": -7.4494, "lon": -78.2703}, {"phase": "第2期", "circle": "HUARAL城市圈", "open_point": "HUARAL", "province": "HUARAL", "department": "LIMA", "route": "北海岸主干", "score": 55.55, "population": 207094, "type": "二级补强圈", "lat": -11.4914, "lon": -77.2053}, {"phase": "第2期", "circle": "CAJAMARCA城市圈", "open_point": "LOS BAÑOS DEL INCA", "province": "CAJAMARCA", "department": "CAJAMARCA", "route": "北山地支线", "score": 55.49, "population": 366201, "type": "二级补强圈", "lat": -7.1617, "lon": -78.4633}, {"phase": "第2期", "circle": "HUAURA/HUACHO城市圈", "open_point": "SAYAN", "province": "HUAURA", "department": "LIMA", "route": "北海岸主干", "score": 54.89, "population": 397824, "type": "二级补强圈", "lat": -11.1364, "lon": -77.1917}, {"phase": "第2期", "circle": "BARRANCA城市圈", "open_point": "BARRANCA", "province": "BARRANCA", "department": "LIMA", "route": "北海岸主干", "score": 53.51, "population": 269335, "type": "二级补强圈", "lat": -10.7564, "lon": -77.7603}, {"phase": "第2期", "circle": "HUARAZ城市圈", "open_point": "INDEPENDENCIA", "province": "HUARAZ", "department": "ANCASH", "route": "中北山地线", "score": 51.19, "population": 166858, "type": "二级补强圈", "lat": -9.5189, "lon": -77.5344}, {"phase": "第2期", "circle": "IQUITOS城市圈", "open_point": "SAN JUAN BAUTISTA", "province": "MAYNAS", "department": "LORETO", "route": "亚马逊独立线", "score": 51.03, "population": 496819, "type": "战略特例圈", "lat": -3.7742, "lon": -73.2864}, {"phase": "第2期", "circle": "MAJES城市圈", "open_point": "MAJES", "province": "CAYLLOMA", "department": "AREQUIPA", "route": "南海岸主干", "score": 50.98, "population": 126240, "type": "二级补强圈", "lat": -16.3586, "lon": -72.1908}, {"phase": "第2期", "circle": "TARAPOTO城市圈", "open_point": "TARAPOTO", "province": "SAN MARTIN", "department": "SAN MARTIN", "route": "北雨林线", "score": 50.49, "population": 193457, "type": "战略特例圈", "lat": -6.4969, "lon": -76.3664}, {"phase": "第2期", "circle": "PACASMAYO城市圈", "open_point": "PACASMAYO", "province": "PACASMAYO", "department": "LA LIBERTAD", "route": "北海岸主干", "score": 49.86, "population": 188803, "type": "二级补强圈", "lat": -7.4006, "lon": -79.5686}, {"phase": "第2期", "circle": "CHAO城市圈", "open_point": "CHAO", "province": "VIRU", "department": "LA LIBERTAD", "route": "北海岸主干", "score": 49.47, "population": 106849, "type": "二级补强圈", "lat": -8.5394, "lon": -78.6825}, {"phase": "第2期", "circle": "PUCALLPA城市圈", "open_point": "CALLERIA", "province": "CORONEL PORTILLO", "department": "UCAYALI", "route": "东向雨林线", "score": 49.04, "population": 439271, "type": "二级补强圈", "lat": -8.3828, "lon": -74.5322}, {"phase": "第2期", "circle": "HUANUCO城市圈", "open_point": "HUANUCO", "province": "HUANUCO", "department": "HUANUCO", "route": "中北山地线", "score": 48.87, "population": 279597, "type": "二级补强圈", "lat": -9.9269, "lon": -76.2403}, {"phase": "第2期", "circle": "LAS LOMAS城市圈", "open_point": "LAS LOMAS", "province": "PIURA", "department": "PIURA", "route": "北海岸支线", "score": 48.46, "population": 284709, "type": "二级补强圈", "lat": -4.6578, "lon": -80.2442}, {"phase": "第3期", "circle": "CELENDIN城市圈", "open_point": "CELENDIN", "province": "CELENDIN", "department": "CAJAMARCA", "route": "北山地支线", "score": 45.18, "population": 149912, "type": "覆盖型圈", "lat": -6.8681, "lon": -78.1489}, {"phase": "第3期", "circle": "JAEN城市圈", "open_point": "JAEN", "province": "JAEN", "department": "CAJAMARCA", "route": "北山地支线", "score": 45.02, "population": 224367, "type": "覆盖型圈", "lat": -5.7106, "lon": -78.8117}, {"phase": "第3期", "circle": "BAMBAMARCA城市圈", "open_point": "BAMBAMARCA", "province": "HUALGAYOC", "department": "CAJAMARCA", "route": "北山地支线", "score": 43.54, "population": 195575, "type": "覆盖型圈", "lat": -6.6786, "lon": -78.5242}, {"phase": "第3期", "circle": "USQUIL城市圈", "open_point": "USQUIL", "province": "OTUZCO", "department": "LA LIBERTAD", "route": "北山地支线", "score": 42.84, "population": 200050, "type": "覆盖型圈", "lat": -7.8156, "lon": -78.4192}, {"phase": "第3期", "circle": "MOYOBAMBA城市圈", "open_point": "MOYOBAMBA", "province": "MOYOBAMBA", "department": "SAN MARTIN", "route": "北雨林线", "score": 42.76, "population": 164127, "type": "覆盖型圈", "lat": -6.0283, "lon": -76.9719}, {"phase": "第3期", "circle": "HUANCAVELICA城市圈", "open_point": "HUANCAVELICA", "province": "HUANCAVELICA", "department": "HUANCAVELICA", "route": "南中山地线", "score": 39.87, "population": 103264, "type": "覆盖型圈", "lat": -12.7869, "lon": -74.9756}, {"phase": "第3期", "circle": "TINGO MARIA城市圈", "open_point": "RUPA-RUPA", "province": "LEONCIO PRADO", "department": "HUANUCO", "route": "东向雨林线", "score": 39.38, "population": 95331, "type": "覆盖型圈", "lat": -9.2944, "lon": -75.9969}, {"phase": "第3期", "circle": "PERENE城市圈", "open_point": "PERENE", "province": "CHANCHAMAYO", "department": "JUNIN", "route": "东向雨林线", "score": 37.7, "population": 160212, "type": "覆盖型圈", "lat": -10.9522, "lon": -75.2244}, {"phase": "第3期", "circle": "CHANCHAMAYO城市圈", "open_point": "PICHANAQUI", "province": "CHANCHAMAYO", "department": "JUNIN", "route": "东向雨林线", "score": 34.8, "population": 242350, "type": "覆盖型圈", "lat": -10.9303, "lon": -74.8728}, {"phase": "第3期", "circle": "SATIPO城市圈", "open_point": "RIO TAMBO", "province": "SATIPO", "department": "JUNIN", "route": "东向雨林线", "score": 33.8, "population": 264363, "type": "覆盖型圈", "lat": -11.2531, "lon": -74.6372}];
+    const colors = {"第1期": "#d22e2e", "第2期": "#eb852d", "第3期": "#9ac44f"};
+    const map = L.map('map').setView([-9.2, -75.2], 5);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+
+    function radarIcon(color) {
+      return L.divIcon({
+        className: 'radar-wrapper',
+        html: `<div class="radar" style="color:${color}"></div>`,
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
+      });
+    }
+
+    points.forEach(item => {
+      const color = colors[item.phase] || '#3468c0';
+      const popup = `
+        <div class="popup-title">${item.circle}</div>
+        <div class="popup-row">阶段：${item.phase}</div>
+        <div class="popup-row">开通点：${item.open_point} / ${item.province} / ${item.department}</div>
+        <div class="popup-row">线路：${item.route}</div>
+        <div class="popup-row">评分：${item.score.toFixed(2)}</div>
+        <div class="popup-row">2025官方人口：${item.population.toLocaleString()}</div>
+        <div class="popup-row">建议类型：${item.type}</div>
+      `;
+      L.marker([item.lat, item.lon], { icon: radarIcon(color) }).addTo(map).bindPopup(popup);
+    });
+  </script>
+</body>
+</html>
