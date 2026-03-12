@@ -265,12 +265,20 @@
       refresh(false);
     });
     payload.cities.forEach(city => {
-      cityLayers[city.circle].on('click', () => {
+      cityLayers[city.circle].on('click', (e) => {
+        if (e.originalEvent) {
+          L.DomEvent.stopPropagation(e.originalEvent);
+        }
         activeCircle = activeCircle === city.circle ? null : city.circle;
         refresh(false);
+        cityLayers[city.circle].openPopup();
       });
     });
-    map.on('click', () => {
+    map.on('click', (e) => {
+      if (e.originalEvent) {
+        const target = e.originalEvent.target;
+        if (target && target.closest && target.closest('.leaflet-popup')) return;
+      }
       if (activeCircle) {
         activeCircle = null;
         refresh(false);
