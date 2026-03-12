@@ -24,25 +24,22 @@
     html, body { height:100%; }
     body { margin:0; font-family:"PingFang SC","Microsoft YaHei",sans-serif; background:radial-gradient(circle at top left,#f6fafc 0,#edf2f7 45%,#e8eef4 100%); color:var(--ink); }
     .shell { height:100vh; display:grid; grid-template-rows:auto 1fr; }
-    .topbar { padding:14px 16px 6px; border-bottom:1px solid var(--line); background:rgba(255,255,255,.88); backdrop-filter: blur(12px); }
-    .page-title { margin:0 0 8px; font-size:26px; letter-spacing:.1px; }
-    .top-grid { display:grid; grid-template-columns:minmax(340px,.95fr) minmax(640px,1.25fr); gap:12px; align-items:start; }
-    .top-card { background:var(--paper); border:1px solid var(--line); border-radius:20px; box-shadow:var(--shadow); }
-    .top-card-inner { padding:10px 12px; }
-    .legend { display:flex; gap:10px; flex-wrap:wrap; font-size:12px; color:var(--muted); }
+    .topbar { padding:10px 12px; border-bottom:1px solid var(--line); background:rgba(255,255,255,.90); backdrop-filter: blur(10px); }
+    .toolbar { display:flex; align-items:center; gap:10px; white-space:nowrap; overflow-x:auto; padding-bottom:2px; }
+    .page-title { margin:0 4px 0 0; font-size:26px; letter-spacing:.1px; flex:0 0 auto; }
+    .legend { display:flex; gap:10px; align-items:center; font-size:12px; color:var(--muted); flex:0 0 auto; padding:6px 10px; border:1px solid #d7e2ec; border-radius:14px; background:#fff; }
     .legend-item { display:inline-flex; align-items:center; gap:8px; }
     .sw-line { width:24px; height:4px; border-radius:999px; }
     .sw-dot { width:12px; height:12px; border-radius:50%; display:inline-block; }
-    .filters-wrap { display:flex; flex-direction:column; gap:6px; justify-content:center; }
-    .filters-wrap .filter-group { width:100%; }
-    .inline-stats { display:flex; align-items:center; gap:10px; margin-left:auto; }
+    .controls { display:flex; align-items:center; gap:8px; flex:1 1 auto; min-width:0; }
+    .inline-stats { display:flex; align-items:center; gap:8px; margin-left:auto; flex:0 0 auto; }
     .inline-stat { min-width:84px; padding:5px 9px; border:1px solid #d7e2ec; border-radius:12px; background:#fff; }
     .inline-stat .k { font-size:11px; color:var(--muted); margin-bottom:2px; }
     .inline-stat .v { font-size:17px; font-weight:800; color:var(--ink); line-height:1.1; }
-    .main { min-height:0; display:grid; grid-template-columns:minmax(840px,1fr) 360px; gap:14px; padding:10px 14px 14px; }
+    .main { min-height:0; display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:10px; padding:8px 10px 10px; }
     .main.sidebar-collapsed { grid-template-columns:minmax(0,1fr); }
     .map-card { min-height:0; position:relative; background:var(--paper); border:1px solid var(--line); border-radius:24px; overflow:hidden; box-shadow:var(--shadow); }
-    #map { height:100%; min-height:820px; }
+    #map { height:100%; min-height:840px; }
     .filter-group { display:flex; align-items:center; flex-wrap:wrap; gap:8px; padding:8px 10px; background:rgba(255,255,255,.93); border:1px solid #d7e2ec; border-radius:16px; box-shadow:0 8px 20px rgba(15,39,64,.08); }
     .filter-group strong { font-size:12px; color:var(--ink); margin-right:2px; }
     .filter-group label { display:inline-flex; align-items:center; gap:5px; font-size:12px; color:#2f465b; cursor:pointer; user-select:none; }
@@ -55,7 +52,7 @@
     .stat-card .k { font-size:12px; color:var(--muted); margin-bottom:4px; }
     .stat-card .v { font-size:32px; font-weight:800; color:var(--ink); }
     .section-card { min-height:0; display:flex; flex-direction:column; overflow:hidden; }
-    .section-head { padding:14px 16px 10px; border-bottom:1px solid #e3ebf2; }
+    .section-head { padding:10px 12px 8px; border-bottom:1px solid #e3ebf2; }
     .section-head h2 { margin:0; font-size:16px; }
     .section-head p { margin:6px 0 0; font-size:12px; color:var(--muted); line-height:1.5; }
     .section-body { min-height:0; overflow:auto; padding:14px; background:var(--panel); }
@@ -80,52 +77,46 @@
     .leaflet-tooltip.city-label::before { display:none; }
     .popup-title { font-weight:800; margin-bottom:6px; }
     .popup-row { font-size:12px; line-height:1.55; }
-    @media (max-width: 1380px) { .top-grid { grid-template-columns:1fr; } .main, .main.sidebar-collapsed { grid-template-columns:1fr; } #map { min-height:640px; } .inline-stats { margin-left:0; width:100%; justify-content:flex-start; } }
+    @media (max-width: 1380px) { .toolbar { flex-wrap:wrap; white-space:normal; overflow-x:visible; } .controls { flex-wrap:wrap; } .main, .main.sidebar-collapsed { grid-template-columns:1fr; } #map { min-height:640px; } .inline-stats { margin-left:0; } }
   </style>
 </head>
 <body>
   <div class="shell">
     <div class="topbar">
-      <h1 class="page-title">网络覆盖计划- PE</h1>
-      <div class="top-grid">
-        <section class="top-card">
-          <div class="top-card-inner">
-            <div class="legend">
-              <span class="legend-item"><i class="sw-line" style="background:var(--trunk)"></i>干线</span>
-              <span class="legend-item"><i class="sw-line" style="background:repeating-linear-gradient(90deg,var(--branch) 0 10px,transparent 10px 16px);height:3px"></i>支线</span>
-              <span class="legend-item"><i class="sw-dot" style="background:var(--p1)"></i>第1期城市圈</span>
-              <span class="legend-item"><i class="sw-dot" style="background:var(--p2)"></i>第2期城市圈</span>
-              <span class="legend-item"><i class="sw-dot" style="background:var(--p3)"></i>第3期城市圈</span>
-              <span class="legend-item"><i class="sw-dot" style="background:#8b97a5"></i>成员行政区小雷达点</span>
-            </div>
+      <div class="toolbar">
+        <h1 class="page-title">网络覆盖计划- PE</h1>
+        <div class="legend">
+          <span class="legend-item"><i class="sw-line" style="background:var(--trunk)"></i>干线</span>
+          <span class="legend-item"><i class="sw-line" style="background:repeating-linear-gradient(90deg,var(--branch) 0 10px,transparent 10px 16px);height:3px"></i>支线</span>
+          <span class="legend-item"><i class="sw-dot" style="background:var(--p1)"></i>第1期</span>
+          <span class="legend-item"><i class="sw-dot" style="background:var(--p2)"></i>第2期</span>
+          <span class="legend-item"><i class="sw-dot" style="background:var(--p3)"></i>第3期</span>
+          <span class="legend-item"><i class="sw-dot" style="background:#8b97a5"></i>成员区</span>
+        </div>
+        <div class="controls">
+          <div class="filter-group">
+            <strong>排期</strong>
+            <label><input type="checkbox" data-phase value="第1期" checked>第1期</label>
+            <label><input type="checkbox" data-phase value="第2期" checked>第2期</label>
+            <label><input type="checkbox" data-phase value="第3期" checked>第3期</label>
           </div>
-        </section>
-        <section class="top-card">
-          <div class="top-card-inner filters-wrap">
-            <div class="filter-group">
-              <strong>排期</strong>
-              <label><input type="checkbox" data-phase value="第1期" checked>第1期</label>
-              <label><input type="checkbox" data-phase value="第2期" checked>第2期</label>
-              <label><input type="checkbox" data-phase value="第3期" checked>第3期</label>
-              <div class="inline-stats">
-                <div class="inline-stat"><div class="k">可见线路</div><div class="v" id="visibleLineCount">0</div></div>
-                <div class="inline-stat"><div class="k">可见商圈</div><div class="v" id="visibleCityCount">0</div></div>
-              </div>
-            </div>
-            <div class="filter-group">
-              <strong>线路</strong>
-              <label><input type="checkbox" data-type value="干线">干线</label>
-              <label><input type="checkbox" data-type value="支线">支线</label>
-            </div>
-            <div class="filter-group">
-              <strong>显示</strong>
-              <label><input type="checkbox" id="toggleLabels" checked>标签</label>
-              <label><input type="checkbox" id="toggleMembers" checked>成员行政区</label>
-              <button type="button" id="toggleOriginalBtn" class="subtle">显示原文</button>
-              <button type="button" id="resetViewBtn">重置视图</button>
-            </div>
+          <div class="filter-group">
+            <strong>线路</strong>
+            <label><input type="checkbox" data-type value="干线">干线</label>
+            <label><input type="checkbox" data-type value="支线">支线</label>
           </div>
-        </section>
+          <div class="filter-group">
+            <strong>显示</strong>
+            <label><input type="checkbox" id="toggleLabels" checked>标签</label>
+            <label><input type="checkbox" id="toggleMembers" checked>成员行政区</label>
+            <button type="button" id="toggleOriginalBtn" class="subtle">显示原文</button>
+            <button type="button" id="resetViewBtn">重置视图</button>
+          </div>
+        </div>
+        <div class="inline-stats">
+          <div class="inline-stat"><div class="k">可见线路</div><div class="v" id="visibleLineCount">0</div></div>
+          <div class="inline-stat"><div class="k">可见商圈</div><div class="v" id="visibleCityCount">0</div></div>
+        </div>
       </div>
     </div>
     <div class="main" id="mainLayout">
