@@ -142,7 +142,7 @@
     const colors = payload.phase_colors;
     const trunkStyle = {color:'#d62f2f', weight:5, opacity:0.92};
     const branchStyle = {color:'#2558bd', weight:3.2, opacity:0.92, dashArray:'8 10', lineCap:'round'};
-    const map = L.map('map', {zoomControl:true}).setView([-10.3, -75.7], 6);
+    const map = L.map('map', {zoomControl:true, dragging:true, scrollWheelZoom:true, doubleClickZoom:true, boxZoom:true}).setView([-10.3, -75.7], 6);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:18, attribution:'&copy; OpenStreetMap'}).addTo(map);
     const linesLayer = L.layerGroup().addTo(map);
     const citiesLayer = L.layerGroup().addTo(map);
@@ -212,6 +212,13 @@
       const route = showOriginal ? line.route_text : line.route_text_cn;
       return `<div class="line-card"><div class="line-card-head"><span class="badge ${badge}">${line.line_code}</span><div class="line-name">${line.line_name}</div></div><div class="meta">${line.phase} / ${line.line_type} / ${line.run_days}</div><div class="meta">${depart} → ${finalNode}</div><div class="route">${route}</div></div>`;
     }
+    let mapResizeTimer = null;
+    function scheduleInvalidateSize() {
+      if (mapResizeTimer) window.clearTimeout(mapResizeTimer);
+      mapResizeTimer = window.setTimeout(() => {
+        map.invalidateSize(false);
+      }, 80);
+    }
     function refresh(shouldFit=false) {
       const f = activeFilters();
       linesLayer.clearLayers();
@@ -246,9 +253,14 @@
       document.getElementById('visibleLineCount').textContent = visibleLines.length;
       document.getElementById('visibleCityCount').textContent = visibleCities;
       const hideSidebar = visibleLines.length === 0;
+      const sidebarEl = document.getElementById('sidebar');
+      const wasHidden = sidebarEl.classList.contains('hidden');
       document.getElementById('sidebar').classList.toggle('hidden', hideSidebar);
       document.getElementById('mainLayout').classList.toggle('sidebar-collapsed', hideSidebar);
       document.getElementById('lineList').innerHTML = visibleLines.map(lineCard).join('') || '<div class="line-card"><div class="meta">当前没有符合筛选条件的线路</div></div>';
+      if (hideSidebar !== wasHidden) {
+        scheduleInvalidateSize();
+      }
       if (shouldFit && bounds && bounds.isValid()) map.fitBounds(bounds.pad(0.14));
     }
     document.querySelectorAll('input[data-phase],input[data-type],#toggleLabels,#toggleMembers').forEach(el => el.addEventListener('change', () => refresh(false)));
@@ -278,6 +290,8 @@
         refresh(false);
       }
     });
+    map.on('dragend zoomend', scheduleInvalidateSize);
+    window.addEventListener('resize', scheduleInvalidateSize);
     refresh(true);
   </script>
 </body>
