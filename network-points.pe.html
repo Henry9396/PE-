@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>网络覆盖计划- PE</title>
+  <title>网点分布规划- PE</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <style>
     :root {
@@ -12,26 +12,35 @@
       --ink:#10253d;
       --muted:#65788c;
       --line:#d7e1ea;
+      --line-strong:#c6d4e0;
+      --accent:#14324b;
+      --soft:#f5f8fb;
       --shadow:0 16px 34px rgba(16,37,61,.10);
     }
     * { box-sizing:border-box; }
     html, body { height:100%; }
     body { margin:0; font-family:"PingFang SC","Microsoft YaHei",sans-serif; background:linear-gradient(180deg,#f7fafc 0,#edf2f6 100%); color:var(--ink); }
     .shell { height:100vh; display:grid; grid-template-rows:auto 1fr; }
-    .topbar { padding:10px 12px; border-bottom:1px solid var(--line); background:rgba(255,255,255,.94); backdrop-filter:blur(10px); }
-    .toolbar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-    .page-title { margin:0 4px 0 0; font-size:26px; letter-spacing:.1px; flex:0 0 auto; }
-    .legend { display:flex; gap:10px; align-items:center; font-size:12px; color:var(--muted); flex:0 0 auto; padding:6px 10px; border:1px solid #d7e2ec; border-radius:14px; background:#fff; }
+    .topbar { padding:14px 14px 12px; border-bottom:1px solid var(--line); background:linear-gradient(180deg,rgba(255,255,255,.98) 0,rgba(247,250,252,.96) 100%); backdrop-filter:blur(12px); }
+    .toolbar { display:grid; grid-template-columns:minmax(280px,1.1fr) minmax(0,1.7fr) auto; gap:12px; align-items:stretch; }
+    .titlebox { padding:14px 16px; border:1px solid var(--line-strong); border-radius:18px; background:linear-gradient(135deg,#16344d 0,#214c6d 100%); color:#fff; box-shadow:0 10px 24px rgba(20,50,75,.16); }
+    .eyebrow { font-size:11px; letter-spacing:.16em; text-transform:uppercase; opacity:.78; }
+    .page-title { margin:6px 0 2px; font-size:28px; letter-spacing:.2px; line-height:1.05; }
+    .page-subtitle { margin:0; font-size:12px; line-height:1.45; color:rgba(255,255,255,.82); }
+    .control-stack { display:grid; gap:10px; }
+    .control-row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .legend { display:flex; gap:10px; align-items:center; font-size:12px; color:var(--muted); padding:10px 12px; border:1px solid var(--line); border-radius:16px; background:var(--soft); min-height:48px; }
     .legend-item { display:inline-flex; align-items:center; gap:8px; }
     .sw-dot { width:12px; height:12px; border-radius:50%; display:inline-block; }
-    .filter-group { display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid var(--line); border-radius:14px; background:#fff; }
+    .filter-group { display:flex; align-items:center; gap:8px; padding:10px 12px; border:1px solid var(--line); border-radius:16px; background:#fff; min-height:48px; }
     .filter-group strong { font-size:12px; }
     .filter-group label { font-size:12px; color:#31465b; }
-    .filter-group button { border:1px solid #cfd9e3; background:#fff; color:var(--ink); border-radius:10px; padding:5px 10px; font-size:12px; cursor:pointer; }
-    .stats { margin-left:auto; display:flex; gap:8px; }
-    .stat { min-width:92px; padding:6px 10px; border-radius:12px; border:1px solid var(--line); background:#fff; }
+    .filter-group button { border:1px solid #cfd9e3; background:#fff; color:var(--ink); border-radius:10px; padding:6px 11px; font-size:12px; cursor:pointer; }
+    .filter-group button:hover { background:#f5f8fb; }
+    .stats { display:grid; grid-template-columns:repeat(2, minmax(96px, 1fr)); gap:10px; }
+    .stat { min-width:96px; padding:12px 12px 10px; border-radius:16px; border:1px solid var(--line); background:#fff; box-shadow:0 6px 16px rgba(16,37,61,.05); }
     .stat .k { font-size:11px; color:var(--muted); }
-    .stat .v { font-size:17px; font-weight:800; }
+    .stat .v { margin-top:2px; font-size:20px; font-weight:800; color:var(--accent); }
     .main { min-height:0; display:grid; grid-template-columns:minmax(0,1fr) 360px; gap:10px; padding:10px; }
     .main.sidebar-collapsed { grid-template-columns:minmax(0,1fr); }
     .map-card, .panel { background:var(--paper); border:1px solid var(--line); border-radius:22px; overflow:hidden; box-shadow:var(--shadow); }
@@ -54,9 +63,10 @@
     .popup-member-box { margin-top:6px; max-height:180px; overflow:auto; padding-right:6px; border-top:1px solid #e5edf3; padding-top:6px; }
     .popup-member-box div { font-size:12px; line-height:1.5; }
     @media (max-width: 1380px) {
+      .toolbar { grid-template-columns:1fr; }
+      .stats { grid-template-columns:repeat(2, minmax(96px, 1fr)); }
       .main, .main.sidebar-collapsed { grid-template-columns:1fr; }
       #map { min-height:640px; }
-      .stats { margin-left:0; }
     }
   </style>
 </head>
@@ -64,26 +74,34 @@
   <div class="shell">
     <div class="topbar">
       <div class="toolbar">
-        <h1 class="page-title">网络覆盖计划- PE</h1>
-        <div class="legend">
-          <span class="legend-item"><i class="sw-dot" style="background:#d62f2f"></i>第1阶段 / 每日</span>
-          <span class="legend-item"><i class="sw-dot" style="background:#f08a24"></i>第2阶段 / 每日或次日</span>
-          <span class="legend-item"><i class="sw-dot" style="background:#2d7dd2"></i>第3阶段 / 每周2-3次</span>
-          <span class="legend-item"><i class="sw-dot" style="background:#79b83b"></i>第4阶段 / 低频覆盖</span>
+        <div class="titlebox">
+          <div class="eyebrow">Peru Nodes Planning</div>
+          <h1 class="page-title">网点分布规划- PE</h1>
+          <p class="page-subtitle">按末端网点视角展示全国覆盖，默认中文，支持切换原文、阶段筛选和覆盖行政区查看。</p>
         </div>
-        <div class="filter-group">
-          <strong>阶段</strong>
-          <label><input type="checkbox" data-stage value="第1阶段" checked>第1阶段</label>
-          <label><input type="checkbox" data-stage value="第2阶段" checked>第2阶段</label>
-          <label><input type="checkbox" data-stage value="第3阶段" checked>第3阶段</label>
-          <label><input type="checkbox" data-stage value="第4阶段" checked>第4阶段</label>
-        </div>
-        <div class="filter-group">
-          <strong>显示</strong>
-          <label><input type="checkbox" id="toggleLabels" checked>标签</label>
-          <label><input type="checkbox" id="toggleMembers" checked>覆盖行政区</label>
-          <button type="button" id="toggleOriginalBtn">显示原文</button>
-          <button type="button" id="resetViewBtn">重置视图</button>
+        <div class="control-stack">
+          <div class="legend">
+            <span class="legend-item"><i class="sw-dot" style="background:#d62f2f"></i>第1阶段 / 每日</span>
+            <span class="legend-item"><i class="sw-dot" style="background:#f08a24"></i>第2阶段 / 每日或次日</span>
+            <span class="legend-item"><i class="sw-dot" style="background:#2d7dd2"></i>第3阶段 / 每周2-3次</span>
+            <span class="legend-item"><i class="sw-dot" style="background:#79b83b"></i>第4阶段 / 低频覆盖</span>
+          </div>
+          <div class="control-row">
+            <div class="filter-group">
+              <strong>阶段</strong>
+              <label><input type="checkbox" data-stage value="第1阶段" checked>第1阶段</label>
+              <label><input type="checkbox" data-stage value="第2阶段" checked>第2阶段</label>
+              <label><input type="checkbox" data-stage value="第3阶段" checked>第3阶段</label>
+              <label><input type="checkbox" data-stage value="第4阶段" checked>第4阶段</label>
+            </div>
+            <div class="filter-group">
+              <strong>显示</strong>
+              <label><input type="checkbox" id="toggleLabels" checked>标签</label>
+              <label><input type="checkbox" id="toggleMembers" checked>覆盖行政区</label>
+              <button type="button" id="toggleOriginalBtn">显示原文</button>
+              <button type="button" id="resetViewBtn">重置视图</button>
+            </div>
+          </div>
         </div>
         <div class="stats">
           <div class="stat"><div class="k">可见网点</div><div class="v" id="visibleNodeCount">0</div></div>
