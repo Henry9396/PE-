@@ -192,7 +192,7 @@
     legend.innerHTML = Object.entries(zoneColors).map(([zone, color]) => `<label class="legend-chip"><input type="checkbox" data-zone value="${zone}" checked><i class="sw-dot" style="background:${color}"></i>${zone}</label>`).join('');
 
     Promise.all([
-      fetch('./pe-franchise-coverage.data.json').then(r => r.json()),
+      fetch('./pe-franchise-coverage.data.json?ts=20260418b', { cache: 'reload' }).then(r => r.json()),
       fetch('https://cdn.jsdelivr.net/npm/pe-atlas@0.0.1/districts-100k.json').then(r => r.json()),
     ]).then(([data, topo]) => {
       const districts = topojson.feature(topo, topo.objects.districts).features;
